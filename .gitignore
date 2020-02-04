@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/netcorehost
+netcorehost.so
+netcorehost.dylib
+netcorehost.dll
+netcorehost.a
+netcorehost.lib
+netcorehost-test-*
+*.exe
+*.o
+*.obj
+*.lst

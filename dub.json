@@ -1,0 +1,10 @@
+{
+	"authors": [
+		"Superbelko"
+	],
+	"copyright": "Copyright © 2019, Superbelko",
+	"description": "Library for embedding .NET runtime in your app.",
+	"license": "MIT",
+	"name": "netcorehost",
+	"targetType": "library"
+}
