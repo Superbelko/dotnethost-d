@@ -49,8 +49,12 @@ struct NetCoreHost
 
     this(DotnetVersionInfo useVersion)
     {
+        version(Windows)
+            enum LIBNAME = "coreclr.dll";
+        else
+            enum LIBNAME = "libcoreclr.so";
         _version = useVersion;
-        _libHandle = loadLibrary(useVersion.path ~ dirSeparator ~ "coreclr.dll");
+        _libHandle = loadLibrary(useVersion.path ~ dirSeparator ~ LIBNAME);
         loadPointers(_libHandle, &loadSymbol);
         //initializeCLR();
     }
@@ -340,9 +344,19 @@ DotnetVersionInfo parse_dotnet_version(string version_)
       }
     }
 
-    return DotnetVersionInfo(major, minor, rev, ver, path, isSDK);
+    return DotnetVersionInfo(major, minor, rev, ver, normalizePathSep(path), isSDK);
 }
 
+
+// buildNormalizedPath() doesn't seem to do the job, so here is a temporary solution
+private string normalizePathSep(string path)
+{
+    import std.path : dirSeparator;
+    return path
+        .replace(`\`, dirSeparator)
+        .replace(`/`, dirSeparator)
+        ;
+}
 
 unittest
 {
@@ -353,11 +367,11 @@ unittest
     import std.stdio;
 
     auto winsdk = parse_dotnet_version(`2.2.301 [C:\Program Files\dotnet\sdk]`);    
-    assert(winsdk == DotnetVersionInfo(2,2,301, `2.2.301`, `C:\Program Files\dotnet\sdk\2.2.301`, true));
+    assert(winsdk == DotnetVersionInfo(2,2,301, `2.2.301`, `C:\Program Files\dotnet\sdk\2.2.301`.normalizePathSep, true));
 
 
     auto winsdkPreview = parse_dotnet_version(`3.0.100-preview8-013656 [C:\Program Files\dotnet\sdk]`);
-    assert(winsdkPreview == DotnetVersionInfo(3,0,100, `3.0.100-preview8-013656`, `C:\Program Files\dotnet\sdk\3.0.100-preview8-013656`));
+    assert(winsdkPreview == DotnetVersionInfo(3,0,100, `3.0.100-preview8-013656`, `C:\Program Files\dotnet\sdk\3.0.100-preview8-013656`.normalizePathSep));
 
     // runtimes only
     //Microsoft.AspNetCore.All 2.1.12 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.All]
@@ -370,7 +384,7 @@ unittest
     //Microsoft.WindowsDesktop.App 3.0.0-preview8-28405-07 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
 
     auto winrtPreview = parse_dotnet_version(`Microsoft.NETCore.App 3.0.0-preview8-28405-07 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]`);
-    assert(winrtPreview == DotnetVersionInfo(3,0,0, `3.0.0-preview8-28405-07`, `C:\Program Files\dotnet\shared\Microsoft.NETCore.App\3.0.0-preview8-28405-07`));
+    assert(winrtPreview == DotnetVersionInfo(3,0,0, `3.0.0-preview8-28405-07`, `C:\Program Files\dotnet\shared\Microsoft.NETCore.App\3.0.0-preview8-28405-07`.normalizePathSep));
 }
 
 
