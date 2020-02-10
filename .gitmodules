@@ -1,0 +1,3 @@
+[submodule "DotNetHostLib"]
+	path = DotNetHostLib
+	url = https://github.com/Superbelko/DotNetHostLib
